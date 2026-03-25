@@ -1,6 +1,5 @@
 'use client';
 
-// v4.0 - Новая заставка с дракой
 import { useState, useEffect, useCallback } from 'react';
 import { GameEngine } from './engine/GameEngine';
 import { GameCanvas } from './GameCanvas';
@@ -15,7 +14,6 @@ import { GAME_WIDTH, GAME_HEIGHT } from './constants';
 // ============================================
 
 export function Game() {
-  // Инициализируем движок в состоянии
   const [engine] = useState(() => new GameEngine());
   const [gameState, setGameState] = useState(engine.state);
   const [currentDialog, setCurrentDialog] = useState(engine.currentDialog);
@@ -31,7 +29,6 @@ export function Game() {
       if (engine.currentDialog !== currentDialog) {
         setCurrentDialog(engine.currentDialog);
       }
-      // Обновляем данные игрока для UI
       setPlayer({ ...engine.player });
       setUpgrades(engine.upgrades.map(u => ({ ...u })));
     }, 100);
@@ -75,7 +72,6 @@ export function Game() {
     setGameState(state);
   }, []);
   
-  // Подсчёт побеждённых врагов
   const getStats = useCallback(() => {
     const defeatedEnemies = engine.enemyGroups.reduce((total, group) => {
       return total + group.enemies.filter(e => e.state === 'dead').length;
@@ -87,14 +83,24 @@ export function Game() {
       gameTime: engine.gameTime,
     };
   }, [engine]);
+
+  // Определение мобильного устройства
+  const isMobile = typeof window !== 'undefined' && (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth < 768
+  );
   
   return (
     <div 
-      className="relative mx-auto"
+      className="relative mx-auto flex flex-col items-center justify-center"
       style={{ 
-        width: GAME_WIDTH, 
+        width: isMobile ? '100vw' : GAME_WIDTH,
         maxWidth: '100%',
-        aspectRatio: `${GAME_WIDTH}/${GAME_HEIGHT}`,
+        minHeight: isMobile ? '100dvh' : 'auto',
+        aspectRatio: isMobile ? 'auto' : `${GAME_WIDTH}/${GAME_HEIGHT}`,
+        background: '#0a001a',
+        overflow: 'hidden',
+        touchAction: 'none',
       }}
     >
       {/* Основной канвас игры */}

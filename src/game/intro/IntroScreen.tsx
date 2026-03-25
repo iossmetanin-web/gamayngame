@@ -81,14 +81,15 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
     <div
       className="relative overflow-hidden select-none"
       style={{
-        width: GAME_WIDTH,
-        height: GAME_HEIGHT,
-        maxWidth: '100%',
+        width: '100%',
+        height: '100%',
+        minHeight: '100dvh',
         background: `linear-gradient(180deg,
           #0a0015 0%,
           #150030 40%,
           #250050 70%,
           #1a0040 100%)`,
+        touchAction: 'manipulation',
       }}
       onClick={handleFirstClick}
     >

@@ -11,8 +11,8 @@ const Game = dynamic(
     loading: () => (
       <div className="flex min-h-screen flex-col items-center justify-center bg-black">
         <div className="flex animate-pulse flex-col items-center gap-4">
-          <Gamepad2 className="h-16 w-16 text-red-500" />
-          <p className="font-mono text-xl text-red-500">
+          <Gamepad2 className="h-16 w-16 text-pink-500" />
+          <p className="font-mono text-xl text-pink-500">
             Загрузка игры...
           </p>
         </div>
@@ -23,19 +23,17 @@ const Game = dynamic(
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-black p-4">
+    <main 
+      className="flex min-h-screen flex-col items-center justify-center bg-black"
+      style={{
+        touchAction: 'none',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+      }}
+    >
       {/* Игра */}
       <Game />
-      
-      {/* Подпись */}
-      <div className="mt-4 text-center">
-        <p 
-          className="font-mono text-sm text-gray-600"
-          style={{ fontFamily: 'monospace' }}
-        >
-          Злобные Гамаюны © 2024
-        </p>
-      </div>
     </main>
   );
 }
