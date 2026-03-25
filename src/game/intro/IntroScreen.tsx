@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { initAudioAfterInteraction, playSelect } from './sounds';
-import { IntroAnimator } from './animation';
+import { initAudioAfterInteraction, playSelect, playRandomHit } from './sounds';
 
 // ============================================
-// ГЛАВНЫЙ КОМПОНЕНТ ЗАСТАВКИ
+// ЗАСТАВКА ИГРЫ
 // ============================================
 
 interface IntroScreenProps {
@@ -14,23 +13,20 @@ interface IntroScreenProps {
 }
 
 export function IntroScreen({ onStart }: IntroScreenProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animatorRef = useRef<IntroAnimator | null>(null);
   const [showButton, setShowButton] = useState(false);
   const [titleVisible, setTitleVisible] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
   const [buttonPressed, setButtonPressed] = useState(false);
-  const hitCountRef = useRef(0);
 
   // Правильное название с пробелом
   const TITLE = 'ЗЛОБНЫЕ ГАМАЮНЫ';
 
   // Инициализация
   useEffect(() => {
-    // Показываем заголовок сразу
-    setTimeout(() => setTitleVisible(true), 500);
-    setTimeout(() => setShowButton(true), 1000);
+    // Показываем заголовок
+    setTimeout(() => setTitleVisible(true), 300);
+    setTimeout(() => setShowButton(true), 800);
 
     // Глитч-эффект
     const glitchInterval = setInterval(() => {
@@ -38,25 +34,17 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       setTimeout(() => setGlitchActive(false), 100);
     }, 4000);
 
-    // Инициализация аниматора
-    if (canvasRef.current) {
-      animatorRef.current = new IntroAnimator(canvasRef.current);
-    }
+    // Периодические звуки кунг-фу
+    const kungFuInterval = setInterval(() => {
+      if (Math.random() < 0.3) {
+        playRandomHit(0.15);
+      }
+    }, 2500);
 
     return () => {
       clearInterval(glitchInterval);
-      animatorRef.current?.stop();
+      clearInterval(kungFuInterval);
     };
-  }, []);
-
-  // Запуск анимации после первого клика
-  const startAnimation = useCallback(() => {
-    initAudioAfterInteraction();
-    if (animatorRef.current) {
-      animatorRef.current.start(() => {
-        hitCountRef.current++;
-      });
-    }
   }, []);
 
   // Обработка клика по кнопке
@@ -69,29 +57,25 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
     }, 150);
   }, [onStart]);
 
+  // Первый клик для активации звука
+  const handleFirstClick = useCallback(() => {
+    initAudioAfterInteraction();
+  }, []);
+
   // Обработка клавиатуры
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Enter' || e.code === 'Space') {
         if (showButton) {
           e.preventDefault();
-          if (!animatorRef.current || hitCountRef.current === 0) {
-            startAnimation();
-          }
-          setTimeout(() => handleButtonClick(), 500);
+          handleButtonClick();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showButton, startAnimation, handleButtonClick]);
-
-  // Первый клик для запуска анимации
-  const handleFirstClick = useCallback(() => {
-    initAudioAfterInteraction();
-    startAnimation();
-  }, [startAnimation]);
+  }, [showButton, handleButtonClick]);
 
   return (
     <div
@@ -161,20 +145,9 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
         <CitySilhouette />
       </div>
 
-      {/* Канвас с анимацией персонажей */}
-      <canvas
-        ref={canvasRef}
-        width={GAME_WIDTH}
-        height={GAME_HEIGHT}
-        className="absolute inset-0 pointer-events-none"
-        style={{ zIndex: 10 }}
-      />
-
       {/* Заголовок */}
       {titleVisible && (
-        <div
-          className="absolute top-[15%] left-0 right-0 z-20 text-center pointer-events-none"
-        >
+        <div className="absolute top-[20%] left-0 right-0 z-20 text-center pointer-events-none">
           <h1
             className="text-5xl md:text-6xl font-black tracking-wider"
             style={{
@@ -208,7 +181,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
 
       {/* Кнопка "Начать игру" */}
       {showButton && (
-        <div className="absolute bottom-[12%] left-0 right-0 z-30 flex justify-center">
+        <div className="absolute bottom-[15%] left-0 right-0 z-30 flex justify-center">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -246,7 +219,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       {/* Подсказка */}
       {showButton && (
         <p
-          className="absolute bottom-[5%] left-0 right-0 z-30 text-center text-sm pointer-events-none"
+          className="absolute bottom-[6%] left-0 right-0 z-30 text-center text-sm pointer-events-none"
           style={{
             fontFamily: 'monospace',
             color: '#666666',
