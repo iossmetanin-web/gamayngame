@@ -1,10 +1,10 @@
 'use client';
 
-// v3.0 - GTA Vice City Style
+// v4.0 - Новая заставка с дракой
 import { useState, useEffect, useCallback } from 'react';
 import { GameEngine } from './engine/GameEngine';
 import { GameCanvas } from './GameCanvas';
-import { IntroScreen } from './ui/IntroScreen';
+import { IntroScreen } from './intro/IntroScreen';
 import { DialogBox } from './ui/DialogBox';
 import { UpgradeMenu } from './ui/UpgradeMenu';
 import { GameOverScreen, VictoryScreen, PauseMenu } from './ui/GameOverlay';
