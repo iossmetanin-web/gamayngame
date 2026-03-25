@@ -49,7 +49,7 @@ export const VICE_COLORS = {
 };
 
 // ============================================
-// РИСОВАНИЕ ИГРОКА (GTA STYLE)
+// РИСОВАНИЕ ИГРОКА (ЧЕЛОВЕК)
 // ============================================
 
 export function drawPlayerGTA(
@@ -58,109 +58,225 @@ export function drawPlayerGTA(
 ) {
   const x = player.position.x + player.width / 2;
   const y = player.position.y + player.height / 2;
-  const size = 18; // Радиус персонажа
+  const time = Date.now() / 150;
+  
+  // Анимация ходьбы
+  const isWalking = player.state === 'walking';
+  const walkAnim = isWalking ? Math.sin(time) * 0.3 : 0;
+  const isAttacking = player.state === 'attacking';
+  const attackAnim = isAttacking ? Math.sin(time * 2) * 0.5 : 0;
   
   ctx.save();
-  
-  // Тень
-  ctx.beginPath();
-  ctx.ellipse(x, y + size * 0.8, size * 0.9, size * 0.4, 0, 0, Math.PI * 2);
-  ctx.fillStyle = VICE_COLORS.shadow;
-  ctx.fill();
-  
-  // Поворот в направлении движения
-  let angle = 0;
-  switch (player.direction) {
-    case 'up': angle = 0; break;
-    case 'right': angle = Math.PI / 2; break;
-    case 'down': angle = Math.PI; break;
-    case 'left': angle = -Math.PI / 2; break;
-  }
-  
   ctx.translate(x, y);
-  ctx.rotate(angle);
   
-  // Тело (круг)
+  // Определяем направление
+  const facingRight = player.direction === 'right';
+  const facingLeft = player.direction === 'left';
+  const facingUp = player.direction === 'up';
+  const facingDown = player.direction === 'down';
+  
+  if (facingLeft) ctx.scale(-1, 1);
+  
+  // ===== ТЕНЬ =====
   ctx.beginPath();
-  ctx.arc(0, 0, size, 0, Math.PI * 2);
-  ctx.fillStyle = VICE_COLORS.playerShirt;
+  ctx.ellipse(0, 22, 14, 6, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
   ctx.fill();
-  ctx.strokeStyle = '#cccccc';
+  
+  // ===== НОГИ =====
+  const legOffset = isWalking ? Math.sin(time * 2) * 6 : 0;
+  
+  // Левая нога
+  ctx.beginPath();
+  ctx.moveTo(-5, 8);
+  ctx.lineTo(-6 - legOffset, 22);
+  ctx.lineTo(-2 - legOffset, 22);
+  ctx.lineTo(-3, 8);
+  ctx.fillStyle = VICE_COLORS.playerPants;
+  ctx.fill();
+  ctx.strokeStyle = '#2a4ab0';
   ctx.lineWidth = 1;
   ctx.stroke();
   
-  // Голова
+  // Правая нога
   ctx.beginPath();
-  ctx.arc(0, -size * 0.5, size * 0.5, 0, Math.PI * 2);
+  ctx.moveTo(3, 8);
+  ctx.lineTo(4 + legOffset, 22);
+  ctx.lineTo(8 + legOffset, 22);
+  ctx.lineTo(7, 8);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Ботинки
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(-7 - legOffset, 19, 6, 4);
+  ctx.fillRect(3 + legOffset, 19, 6, 4);
+  
+  // ===== ТЕЛО (ТОРС) =====
+  ctx.beginPath();
+  ctx.moveTo(-10, 6);
+  ctx.quadraticCurveTo(-12, -5, -8, -14);
+  ctx.lineTo(8, -14);
+  ctx.quadraticCurveTo(12, -5, 10, 6);
+  ctx.lineTo(-10, 6);
+  ctx.fillStyle = VICE_COLORS.playerShirt;
+  ctx.fill();
+  ctx.strokeStyle = '#dddddd';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  
+  // Детали рубашки - полоска
+  ctx.fillStyle = VICE_COLORS.playerBandana;
+  ctx.fillRect(-2, -12, 4, 16);
+  
+  // ===== РУКИ =====
+  const armSwing = isWalking ? Math.sin(time * 2) * 15 : 0;
+  const attackSwing = isAttacking ? -60 + attackAnim * 30 : 0;
+  
+  // Левая рука
+  ctx.save();
+  ctx.translate(-10, -8);
+  ctx.rotate((armSwing * Math.PI / 180));
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-3, 12);
+  ctx.lineTo(1, 12);
+  ctx.lineTo(4, 0);
+  ctx.fillStyle = VICE_COLORS.playerShirt;
+  ctx.fill();
+  
+  // Кисть
+  ctx.beginPath();
+  ctx.arc(-1, 14, 4, 0, Math.PI * 2);
   ctx.fillStyle = VICE_COLORS.playerSkin;
   ctx.fill();
-  ctx.strokeStyle = '#d4a088';
-  ctx.stroke();
+  ctx.restore();
   
-  // Волосы
+  // Правая рука с битой
+  ctx.save();
+  ctx.translate(10, -8);
+  ctx.rotate((attackSwing - armSwing) * Math.PI / 180);
+  
   ctx.beginPath();
-  ctx.arc(0, -size * 0.6, size * 0.45, Math.PI, Math.PI * 2);
-  ctx.fillStyle = VICE_COLORS.playerHair;
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-3, 12);
+  ctx.lineTo(1, 12);
+  ctx.lineTo(4, 0);
+  ctx.fillStyle = VICE_COLORS.playerShirt;
   ctx.fill();
   
-  // Повязка (красная)
+  // Кисть
   ctx.beginPath();
-  ctx.arc(0, -size * 0.5, size * 0.52, Math.PI * 0.8, Math.PI * 2.2);
-  ctx.strokeStyle = VICE_COLORS.playerBandana;
-  ctx.lineWidth = 3;
-  ctx.stroke();
+  ctx.arc(-1, 14, 4, 0, Math.PI * 2);
+  ctx.fillStyle = VICE_COLORS.playerSkin;
+  ctx.fill();
   
-  // Бита в руке
-  if (player.state === 'attacking') {
-    // Анимация замаха
-    ctx.save();
-    ctx.rotate(-Math.PI / 4);
-    
-    // Рука
+  // БИТА
+  if (isAttacking) {
+    // Бита в замахе
     ctx.beginPath();
-    ctx.moveTo(size * 0.5, 0);
-    ctx.lineTo(size * 1.5, -size * 0.3);
-    ctx.strokeStyle = VICE_COLORS.playerSkin;
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    
-    // Бита
-    ctx.beginPath();
-    ctx.moveTo(size * 1.3, -size * 0.2);
-    ctx.lineTo(size * 2.5, -size * 0.5);
+    ctx.moveTo(-1, 18);
+    ctx.lineTo(-15, 35);
     ctx.strokeStyle = '#8B4513';
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 6;
     ctx.lineCap = 'round';
     ctx.stroke();
     
     // Утолщение биты
     ctx.beginPath();
-    ctx.arc(size * 2.5, -size * 0.5, 4, 0, Math.PI * 2);
+    ctx.arc(-15, 35, 5, 0, Math.PI * 2);
     ctx.fillStyle = '#A0522D';
     ctx.fill();
-    
-    ctx.restore();
-  } else {
-    // Бита на плече или в руке
-    ctx.beginPath();
-    ctx.moveTo(size * 0.3, -size * 0.3);
-    ctx.lineTo(size * 1.5, -size * 0.8);
-    ctx.strokeStyle = '#8B4513';
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  }
-  
-  // Эффект питья
-  if (player.state === 'drinking') {
-    ctx.beginPath();
-    ctx.arc(size * 0.2, -size * 0.7, 5, 0, Math.PI * 2);
-    ctx.fillStyle = VICE_COLORS.neonYellow;
-    ctx.fill();
-    ctx.strokeStyle = '#aa8800';
+    ctx.strokeStyle = '#6B3003';
     ctx.lineWidth = 1;
     ctx.stroke();
+  } else {
+    // Бита на плече
+    ctx.beginPath();
+    ctx.moveTo(2, 10);
+    ctx.lineTo(20, -5);
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.arc(20, -5, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#A0522D';
+    ctx.fill();
   }
+  ctx.restore();
+  
+  // ===== ГОЛОВА =====
+  ctx.beginPath();
+  ctx.ellipse(0, -20, 9, 10, 0, 0, Math.PI * 2);
+  ctx.fillStyle = VICE_COLORS.playerSkin;
+  ctx.fill();
+  ctx.strokeStyle = '#d4a088';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  
+  // Волосы
+  ctx.beginPath();
+  ctx.ellipse(0, -24, 8, 6, 0, Math.PI, Math.PI * 2);
+  ctx.fillStyle = VICE_COLORS.playerHair;
+  ctx.fill();
+  
+  // Красная повязка на голове
+  ctx.beginPath();
+  ctx.moveTo(-10, -21);
+  ctx.lineTo(10, -21);
+  ctx.strokeStyle = VICE_COLORS.playerBandana;
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  
+  // Хвостик повязки сзади
+  ctx.beginPath();
+  ctx.moveTo(-9, -21);
+  ctx.lineTo(-14, -15);
+  ctx.strokeStyle = VICE_COLORS.playerBandana;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  // Глаза
+  const eyeOffsetX = facingRight ? 2 : (facingLeft ? -2 : 0);
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.ellipse(-3 + eyeOffsetX, -20, 3, 2.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(4 + eyeOffsetX, -20, 3, 2.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Зрачки
+  ctx.fillStyle = '#2a2a2a';
+  ctx.beginPath();
+  ctx.arc(-2 + eyeOffsetX + (facingRight ? 1 : facingLeft ? -1 : 0), -20, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(5 + eyeOffsetX + (facingRight ? 1 : facingLeft ? -1 : 0), -20, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Брови (серьёзное выражение)
+  ctx.strokeStyle = VICE_COLORS.playerHair;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-6 + eyeOffsetX, -24);
+  ctx.lineTo(-1 + eyeOffsetX, -23);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(3 + eyeOffsetX, -23);
+  ctx.lineTo(8 + eyeOffsetX, -24);
+  ctx.stroke();
+  
+  // Рот
+  ctx.beginPath();
+  ctx.moveTo(-2, -15);
+  ctx.lineTo(2, -15);
+  ctx.strokeStyle = '#8B5A3C';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
   
   ctx.restore();
   
@@ -169,17 +285,29 @@ export function drawPlayerGTA(
     ctx.save();
     ctx.globalAlpha = 0.4;
     ctx.beginPath();
-    ctx.arc(x, y, size + 5, 0, Math.PI * 2);
+    ctx.ellipse(x, y, 25, 30, 0, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.fill();
     ctx.restore();
   }
   
-  // Неоновое свечение вокруг игрока
+  // Эффект питья
+  if (player.state === 'drinking') {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x + 10, y - 25, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#aa8844';
+    ctx.fill();
+    ctx.fillStyle = '#ff4444';
+    ctx.fillRect(x + 6, y - 32, 8, 5);
+    ctx.restore();
+  }
+  
+  // Лёгкое неоновое свечение
   ctx.save();
-  ctx.globalAlpha = 0.15;
+  ctx.globalAlpha = 0.1;
   ctx.beginPath();
-  ctx.arc(x, y, size + 8, 0, Math.PI * 2);
+  ctx.ellipse(x, y, 30, 35, 0, 0, Math.PI * 2);
   ctx.strokeStyle = VICE_COLORS.neonBlue;
   ctx.lineWidth = 3;
   ctx.stroke();
@@ -187,7 +315,7 @@ export function drawPlayerGTA(
 }
 
 // ============================================
-// РИСОВАНИЕ ВРАГА (GTA STYLE)
+// РИСОВАНИЕ ВРАГА (ЧЕЛОВЕК)
 // ============================================
 
 export function drawEnemyGTA(
@@ -196,106 +324,224 @@ export function drawEnemyGTA(
 ) {
   const x = enemy.position.x + enemy.width / 2;
   const y = enemy.position.y + enemy.height / 2;
+  const time = Date.now() / 150;
   
   // Размеры по типу
-  let size = 15;
-  let bodyColor = '#556677';
+  let scale = 1;
+  let shirtColor = '#556677';
   let pantsColor = '#334455';
+  let hairColor = '#333333';
   let accentColor = VICE_COLORS.neonPink;
   
   switch (enemy.type) {
     case 'normal':
-      size = 15;
-      bodyColor = '#556677';
-      pantsColor = '#334455';
+      scale = 1;
+      shirtColor = '#4a5568';
+      pantsColor = '#2d3748';
+      hairColor = '#1a1a1a';
       accentColor = VICE_COLORS.neonPink;
       break;
     case 'fast':
-      size = 12;
-      bodyColor = '#447755';
-      pantsColor = '#335544';
+      scale = 0.85;
+      shirtColor = '#2d5a3d';
+      pantsColor = '#1e3a2a';
+      hairColor = '#4a2a0a';
       accentColor = VICE_COLORS.neonGreen;
       break;
     case 'heavy':
-      size = 20;
-      bodyColor = '#665544';
-      pantsColor = '#443322';
+      scale = 1.3;
+      shirtColor = '#5a3a2a';
+      pantsColor = '#3a2a1a';
+      hairColor = '#2a1a0a';
       accentColor = VICE_COLORS.neonOrange;
       break;
     case 'boss':
-      size = 25;
-      bodyColor = '#882233';
-      pantsColor = '#441122';
+      scale = 1.5;
+      shirtColor = '#6a1a2a';
+      pantsColor = '#3a0a1a';
+      hairColor = '#0a0a0a';
       accentColor = VICE_COLORS.neonPurple;
       break;
   }
   
+  // Анимация ходьбы
+  const isWalking = enemy.state === 'walking';
+  const legOffset = isWalking ? Math.sin(time * 2) * 5 * scale : 0;
+  const armSwing = isWalking ? Math.sin(time * 2) * 12 : 0;
+  
   ctx.save();
-  
-  // Тень
-  ctx.beginPath();
-  ctx.ellipse(x, y + size * 0.8, size * 0.9, size * 0.4, 0, 0, Math.PI * 2);
-  ctx.fillStyle = VICE_COLORS.shadow;
-  ctx.fill();
-  
-  // Поворот к игроку
-  let angle = 0;
-  switch (enemy.direction) {
-    case 'up': angle = 0; break;
-    case 'right': angle = Math.PI / 2; break;
-    case 'down': angle = Math.PI; break;
-    case 'left': angle = -Math.PI / 2; break;
-  }
-  
   ctx.translate(x, y);
-  ctx.rotate(angle);
+  ctx.scale(scale, scale);
   
-  // Тело
+  // Направление
+  const facingLeft = enemy.direction === 'left';
+  if (facingLeft) ctx.scale(-1, 1);
+  
+  // ===== ТЕНЬ =====
   ctx.beginPath();
-  ctx.arc(0, 0, size, 0, Math.PI * 2);
-  ctx.fillStyle = bodyColor;
+  ctx.ellipse(0, 20, 12, 5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
   ctx.fill();
-  ctx.strokeStyle = pantsColor;
-  ctx.lineWidth = 2;
+  
+  // ===== НОГИ =====
+  ctx.fillStyle = pantsColor;
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 1;
+  
+  // Левая нога
+  ctx.beginPath();
+  ctx.moveTo(-4, 7);
+  ctx.lineTo(-5 - legOffset, 20);
+  ctx.lineTo(-1 - legOffset, 20);
+  ctx.lineTo(-2, 7);
+  ctx.fill();
   ctx.stroke();
   
-  // Голова
+  // Правая нога
   ctx.beginPath();
-  ctx.arc(0, -size * 0.5, size * 0.45, 0, Math.PI * 2);
+  ctx.moveTo(2, 7);
+  ctx.lineTo(3 + legOffset, 20);
+  ctx.lineTo(7 + legOffset, 20);
+  ctx.lineTo(6, 7);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Ботинки
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(-6 - legOffset, 17, 5, 4);
+  ctx.fillRect(2 + legOffset, 17, 5, 4);
+  
+  // ===== ТЕЛО =====
+  ctx.beginPath();
+  ctx.moveTo(-8, 5);
+  ctx.quadraticCurveTo(-10, -3, -6, -12);
+  ctx.lineTo(6, -12);
+  ctx.quadraticCurveTo(10, -3, 8, 5);
+  ctx.lineTo(-8, 5);
+  ctx.fillStyle = shirtColor;
+  ctx.fill();
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  
+  // ===== РУКИ =====
+  // Левая рука
+  ctx.save();
+  ctx.translate(-8, -6);
+  ctx.rotate((armSwing * Math.PI / 180));
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-2, 10);
+  ctx.lineTo(2, 10);
+  ctx.lineTo(3, 0);
+  ctx.fillStyle = shirtColor;
+  ctx.fill();
+  
+  // Кисть
+  ctx.beginPath();
+  ctx.arc(0, 12, 3, 0, Math.PI * 2);
   ctx.fillStyle = VICE_COLORS.playerSkin;
   ctx.fill();
+  ctx.restore();
+  
+  // Правая рука
+  ctx.save();
+  ctx.translate(8, -6);
+  ctx.rotate((-armSwing * Math.PI / 180));
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-2, 10);
+  ctx.lineTo(2, 10);
+  ctx.lineTo(3, 0);
+  ctx.fillStyle = shirtColor;
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.arc(0, 12, 3, 0, Math.PI * 2);
+  ctx.fillStyle = VICE_COLORS.playerSkin;
+  ctx.fill();
+  ctx.restore();
+  
+  // ===== ГОЛОВА =====
+  ctx.beginPath();
+  ctx.ellipse(0, -18, 8, 9, 0, 0, Math.PI * 2);
+  ctx.fillStyle = VICE_COLORS.playerSkin;
+  ctx.fill();
+  ctx.strokeStyle = '#c49478';
+  ctx.lineWidth = 1;
+  ctx.stroke();
   
   // Волосы/шапка
   ctx.beginPath();
-  ctx.arc(0, -size * 0.55, size * 0.4, Math.PI, Math.PI * 2);
-  ctx.fillStyle = enemy.type === 'boss' ? '#1a1a1a' : '#333333';
+  ctx.ellipse(0, -22, 7, 5, 0, Math.PI, Math.PI * 2);
+  ctx.fillStyle = hairColor;
   ctx.fill();
   
-  // Глаза (красные если агрессивен)
+  // Глаза
   if (enemy.isAggro) {
+    // Красные глаза при агрессии
     ctx.fillStyle = '#ff0000';
     ctx.beginPath();
-    ctx.arc(-size * 0.15, -size * 0.55, 2, 0, Math.PI * 2);
+    ctx.arc(-3, -18, 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(size * 0.15, -size * 0.55, 2, 0, Math.PI * 2);
+    ctx.arc(3, -18, 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Злые брови
+    ctx.strokeStyle = hairColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-6, -23);
+    ctx.lineTo(-1, -21);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(1, -21);
+    ctx.lineTo(6, -23);
+    ctx.stroke();
+  } else {
+    // Обычные глаза
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(-3, -18, 2.5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(3, -18, 2.5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#2a2a2a';
+    ctx.beginPath();
+    ctx.arc(-3, -18, 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(3, -18, 1, 0, Math.PI * 2);
     ctx.fill();
   }
   
+  // Рот
+  ctx.beginPath();
+  ctx.moveTo(-2, -13);
+  ctx.lineTo(2, -13);
+  ctx.strokeStyle = '#8B5A3C';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  
   // Особые черты босса
   if (enemy.type === 'boss') {
-    // Цепь
+    // Шрам
     ctx.beginPath();
-    ctx.arc(0, -size * 0.1, size * 0.8, Math.PI * 0.3, Math.PI * 0.7);
-    ctx.strokeStyle = '#ffd700';
+    ctx.moveTo(-8, -22);
+    ctx.lineTo(-4, -14);
+    ctx.strokeStyle = '#aa2222';
     ctx.lineWidth = 2;
     ctx.stroke();
     
-    // Шрам
+    // Золотая цепь
     ctx.beginPath();
-    ctx.moveTo(-size * 0.1, -size * 0.7);
-    ctx.lineTo(size * 0.1, -size * 0.5);
-    ctx.strokeStyle = '#aa2222';
+    ctx.ellipse(0, -10, 8, 4, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 2;
     ctx.stroke();
   }
@@ -307,7 +553,7 @@ export function drawEnemyGTA(
     ctx.save();
     ctx.globalAlpha = 0.5;
     ctx.beginPath();
-    ctx.arc(x, y, size + 3, 0, Math.PI * 2);
+    ctx.ellipse(x, y, 20 * scale, 25 * scale, 0, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.fill();
     ctx.restore();
@@ -315,9 +561,9 @@ export function drawEnemyGTA(
   
   // Неоновое свечение
   ctx.save();
-  ctx.globalAlpha = enemy.isAggro ? 0.3 : 0.15;
+  ctx.globalAlpha = enemy.isAggro ? 0.25 : 0.1;
   ctx.beginPath();
-  ctx.arc(x, y, size + 5, 0, Math.PI * 2);
+  ctx.ellipse(x, y, 22 * scale, 28 * scale, 0, 0, Math.PI * 2);
   ctx.strokeStyle = accentColor;
   ctx.lineWidth = 2;
   ctx.stroke();
@@ -325,21 +571,18 @@ export function drawEnemyGTA(
   
   // HP бар для босса
   if (enemy.type === 'boss' && enemy.state !== 'dead') {
-    const barWidth = 50;
+    const barWidth = 60;
     const barHeight = 6;
     const barX = x - barWidth / 2;
-    const barY = y - size - 15;
+    const barY = y - 45 * scale;
     const healthPercent = enemy.health / enemy.maxHealth;
     
-    // Фон
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2);
     
-    // Здоровье
     ctx.fillStyle = healthPercent > 0.5 ? '#22cc44' : healthPercent > 0.25 ? '#ccaa22' : '#cc2222';
     ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
     
-    // Рамка
     ctx.strokeStyle = VICE_COLORS.neonPurple;
     ctx.lineWidth = 1;
     ctx.strokeRect(barX, barY, barWidth, barHeight);

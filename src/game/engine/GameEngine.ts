@@ -153,41 +153,74 @@ export class GameEngine {
   }
   
   initializeEnemyGroups() {
-    // Группа 1 - начальная зона
+    // Группа 1 - начальная зона (больше врагов!)
     this.enemyGroups.push({
       id: 1,
       position: { x: 300, y: 250 },
-      enemies: this.createEnemyGroup(1, { x: 300, y: 250 }, 'normal', 3),
+      enemies: this.createEnemyGroup(1, { x: 300, y: 250 }, 'normal', 6),
       isDefeated: false,
       wasApproached: false,
       dialogShown: false,
     });
     
-    // Группа 2 - средняя зона
+    // Группа 2 - средняя зона (ещё больше!)
     this.enemyGroups.push({
       id: 2,
       position: { x: 700, y: 400 },
-      enemies: this.createEnemyGroup(2, { x: 700, y: 400 }, 'mixed', 4),
+      enemies: this.createEnemyGroup(2, { x: 700, y: 400 }, 'mixed', 8),
       isDefeated: false,
       wasApproached: false,
       dialogShown: false,
     });
     
-    // Группа 3 - дальняя зона
+    // Группа 3 - дальняя зона (тяжёлые)
     this.enemyGroups.push({
       id: 3,
       position: { x: 1100, y: 300 },
-      enemies: this.createEnemyGroup(3, { x: 1100, y: 300 }, 'heavy', 3),
+      enemies: this.createEnemyGroup(3, { x: 1100, y: 300 }, 'heavy', 6),
       isDefeated: false,
       wasApproached: false,
       dialogShown: false,
     });
     
-    // Мини-босс
+    // Группа 4 - дополнительная зона
     this.enemyGroups.push({
       id: 4,
+      position: { x: 400, y: 700 },
+      enemies: this.createEnemyGroup(4, { x: 400, y: 700 }, 'mixed', 7),
+      isDefeated: false,
+      wasApproached: false,
+      dialogShown: false,
+    });
+    
+    // Группа 5 - ещё одна зона
+    this.enemyGroups.push({
+      id: 5,
+      position: { x: 900, y: 150 },
+      enemies: this.createEnemyGroup(5, { x: 900, y: 150 }, 'heavy', 5),
+      isDefeated: false,
+      wasApproached: false,
+      dialogShown: false,
+    });
+    
+    // Группа 6 - мини-босс
+    this.enemyGroups.push({
+      id: 6,
       position: { x: 1400, y: 600 },
-      enemies: [this.createEnemy('boss', { x: 1400, y: 600 }, 4)],
+      enemies: [this.createEnemy('boss', { x: 1400, y: 600 }, 6)],
+      isDefeated: false,
+      wasApproached: false,
+      dialogShown: false,
+    });
+    
+    // Группа 7 - финальный босс с охраной
+    this.enemyGroups.push({
+      id: 7,
+      position: { x: 1500, y: 200 },
+      enemies: [
+        this.createEnemy('boss', { x: 1500, y: 200 }, 7),
+        ...this.createEnemyGroup(7, { x: 1500, y: 200 }, 'heavy', 3),
+      ],
       isDefeated: false,
       wasApproached: false,
       dialogShown: false,

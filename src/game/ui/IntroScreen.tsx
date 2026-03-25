@@ -33,6 +33,16 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       setTimeout(() => setGlitchActive(false), 100);
     }, 3000);
     
+    // Кунг-фу звуки на заставке
+    const kungFuSounds = () => {
+      const sounds = ['hit', 'select'];
+      const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+      playSound(randomSound, 0.15);
+    };
+    
+    // Периодические кунг-фу звуки
+    const kungFuInterval = setInterval(kungFuSounds, 2000);
+    
     // Заголовок по буквам
     const timer3 = setTimeout(() => {
       setTitleVisible(true);
@@ -40,7 +50,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       const charInterval = setInterval(() => {
         charIndex++;
         setTitleChars(charIndex);
-        playSound('select', 0.05);
+        playSound('hit', 0.08);
         if (charIndex >= title.length) {
           clearInterval(charInterval);
           setTimeout(() => setShowButton(true), 400);
@@ -53,6 +63,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       clearTimeout(timer2);
       clearTimeout(timer3);
       clearInterval(glitchInterval);
+      clearInterval(kungFuInterval);
     };
   }, []);
   
@@ -192,28 +203,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
             ))}
           </h1>
           
-          {/* Подзаголовок */}
-          <p 
-            className="mt-6 text-lg md:text-xl tracking-[0.3em] uppercase"
-            style={{
-              fontFamily: 'Arial, sans-serif',
-              color: VICE_COLORS.neonYellow,
-              textShadow: `0 0 10px ${VICE_COLORS.neonYellow}`,
-            }}
-          >
-            Vice City Beat&apos;em Up
-          </p>
-          
-          {/* Год */}
-          <p 
-            className="mt-2 text-sm tracking-[0.5em]"
-            style={{
-              fontFamily: 'monospace',
-              color: '#888888',
-            }}
-          >
-            1986
-          </p>
+          {/* Кунг-фу звуки на заставке */}
         </div>
       )}
       
