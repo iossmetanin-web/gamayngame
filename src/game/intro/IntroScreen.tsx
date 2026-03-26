@@ -5,7 +5,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { initAudioAfterInteraction, playSelect, playRandomHit } from './sounds';
 
 // ============================================
-// ЗАСТАВКА ИГРЫ
+// ЗАСТАВКА ИГРЫ (МОБИЛЬНО-АДАПТИВНАЯ)
 // ============================================
 
 interface IntroScreenProps {
@@ -18,6 +18,20 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
   const [glitchActive, setGlitchActive] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
   const [buttonPressed, setButtonPressed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Определение мобильного устройства
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || window.innerWidth < 768
+        || ('ontouchstart' in window);
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Правильное название с пробелом
   const TITLE = 'ЗЛОБНЫЕ ГАМАЮНЫ';
@@ -76,6 +90,12 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showButton, handleButtonClick]);
+
+  // Адаптивные размеры
+  const titleFontSize = isMobile ? 'text-3xl sm:text-4xl' : 'text-5xl md:text-7xl';
+  const letterSpacing = isMobile ? '4px' : '10px';
+  const letterSpacing2 = isMobile ? '3px' : '8px';
+  const gapSize = isMobile ? 'gap-3' : 'gap-4';
 
   return (
     <div
@@ -148,19 +168,19 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
 
       {/* Заголовок - ЗЛОБНЫЕ сверху, ГАМАЮНЫ снизу */}
       {titleVisible && (
-        <div className="absolute top-[18%] left-0 right-0 z-20 text-center pointer-events-none flex flex-col items-center gap-2">
+        <div className={`absolute top-[15%] sm:top-[18%] left-0 right-0 z-20 text-center pointer-events-none flex flex-col items-center ${gapSize} px-4`}>
           {/* ЗЛОБНЫЕ */}
           <h1
-            className="text-5xl md:text-7xl font-black tracking-widest"
+            className={`${titleFontSize} font-black tracking-widest`}
             style={{
               fontFamily: 'Impact, Arial Black, sans-serif',
               color: glitchActive ? '#00d4ff' : '#ff1493',
               textShadow: glitchActive
-                ? `4px 4px 0 #000, 0 0 40px #00d4ff, 0 0 80px #00d4ff`
-                : `4px 4px 0 #000, 0 0 40px #ff1493, 0 0 80px #ff1493`,
+                ? `3px 3px 0 #000, 0 0 30px #00d4ff, 0 0 60px #00d4ff`
+                : `3px 3px 0 #000, 0 0 30px #ff1493, 0 0 60px #ff1493`,
               transform: glitchActive ? 'translateX(2px) skewX(-2deg)' : 'none',
               transition: 'transform 0.05s',
-              letterSpacing: '10px',
+              letterSpacing: letterSpacing,
             }}
           >
             {'ЗЛОБНЫЕ'.split('').map((char, i) => (
@@ -180,16 +200,16 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
           </h1>
           {/* ГАМАЮНЫ */}
           <h1
-            className="text-5xl md:text-7xl font-black tracking-widest"
+            className={`${titleFontSize} font-black tracking-widest`}
             style={{
               fontFamily: 'Impact, Arial Black, sans-serif',
               color: glitchActive ? '#ff1493' : '#00d4ff',
               textShadow: glitchActive
-                ? `4px 4px 0 #000, 0 0 40px #ff1493, 0 0 80px #ff1493`
-                : `4px 4px 0 #000, 0 0 40px #00d4ff, 0 0 80px #00d4ff`,
+                ? `3px 3px 0 #000, 0 0 30px #ff1493, 0 0 60px #ff1493`
+                : `3px 3px 0 #000, 0 0 30px #00d4ff, 0 0 60px #00d4ff`,
               transform: glitchActive ? 'translateX(-2px) skewX(2deg)' : 'none',
               transition: 'transform 0.05s',
-              letterSpacing: '8px',
+              letterSpacing: letterSpacing2,
             }}
           >
             {'ГАМАЮНЫ'.split('').map((char, i) => (
@@ -212,7 +232,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
 
       {/* Кнопка "Начать игру" */}
       {showButton && (
-        <div className="absolute bottom-[15%] left-0 right-0 z-30 flex justify-center">
+        <div className="absolute bottom-[12%] sm:bottom-[15%] left-0 right-0 z-30 flex justify-center px-4">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -225,7 +245,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
             }}
             onMouseDown={() => setButtonPressed(true)}
             onMouseUp={() => setButtonPressed(false)}
-            className="px-10 py-4 font-black text-xl uppercase tracking-widest transition-all duration-150"
+            className={`${isMobile ? 'px-6 py-3 text-base sm:text-lg' : 'px-10 py-4 text-xl'} font-black uppercase tracking-widest transition-all duration-150`}
             style={{
               fontFamily: 'Impact, Arial Black, sans-serif',
               background: `linear-gradient(180deg,
@@ -247,8 +267,8 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
         </div>
       )}
 
-      {/* Подсказка */}
-      {showButton && (
+      {/* Подсказка - только для десктопа */}
+      {showButton && !isMobile && (
         <p
           className="absolute bottom-[6%] left-0 right-0 z-30 text-center text-sm pointer-events-none"
           style={{
@@ -260,19 +280,32 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
         </p>
       )}
 
-      {/* CRT эффект сканлайнов */}
+      {/* Подсказка для мобильных */}
+      {showButton && isMobile && (
+        <p
+          className="absolute bottom-[5%] left-0 right-0 z-30 text-center text-xs pointer-events-none"
+          style={{
+            fontFamily: 'monospace',
+            color: '#666666',
+          }}
+        >
+          Нажмите на кнопку выше
+        </p>
+      )}
+
+      {/* CRT эффект сканлайнов - менее интенсивный на мобильных */}
       <div
         className="pointer-events-none absolute inset-0 z-40"
         style={{
-          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px)',
+          background: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,${isMobile ? '0.08' : '0.15'}) 2px, rgba(0,0,0,${isMobile ? '0.08' : '0.15'}) 4px)`,
         }}
       />
 
-      {/* Виньетка */}
+      {/* Виньетка - менее интенсивная на мобильных */}
       <div
         className="pointer-events-none absolute inset-0 z-30"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.6) 100%)',
+          background: `radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,${isMobile ? '0.4' : '0.6'}) 100%)`,
         }}
       />
 
