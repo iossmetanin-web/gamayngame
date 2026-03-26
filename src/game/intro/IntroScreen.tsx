@@ -146,11 +146,12 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
         <CitySilhouette />
       </div>
 
-      {/* Заголовок */}
+      {/* Заголовок - ЗЛОБНЫЕ сверху, ГАМАЮНЫ снизу */}
       {titleVisible && (
-        <div className="absolute top-[20%] left-0 right-0 z-20 text-center pointer-events-none">
+        <div className="absolute top-[18%] left-0 right-0 z-20 text-center pointer-events-none flex flex-col items-center gap-2">
+          {/* ЗЛОБНЫЕ */}
           <h1
-            className="text-5xl md:text-6xl font-black tracking-wider"
+            className="text-5xl md:text-7xl font-black tracking-widest"
             style={{
               fontFamily: 'Impact, Arial Black, sans-serif',
               color: glitchActive ? '#00d4ff' : '#ff1493',
@@ -159,16 +160,45 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
                 : `4px 4px 0 #000, 0 0 40px #ff1493, 0 0 80px #ff1493`,
               transform: glitchActive ? 'translateX(2px) skewX(-2deg)' : 'none',
               transition: 'transform 0.05s',
-              letterSpacing: '4px',
+              letterSpacing: '10px',
             }}
           >
-            {TITLE.split('').map((char, i) => (
+            {'ЗЛОБНЫЕ'.split('').map((char, i) => (
               <span
-                key={i}
+                key={`zlob-${i}`}
                 className="inline-block"
                 style={{
-                  animationDelay: `${i * 0.03}s`,
-                  transform: glitchActive && i % 3 === 0
+                  animationDelay: `${i * 0.05}s`,
+                  transform: glitchActive && i % 2 === 0
+                    ? `translateY(${Math.random() * 4 - 2}px)`
+                    : 'none',
+                }}
+              >
+                {char}
+              </span>
+            ))}
+          </h1>
+          {/* ГАМАЮНЫ */}
+          <h1
+            className="text-5xl md:text-7xl font-black tracking-widest"
+            style={{
+              fontFamily: 'Impact, Arial Black, sans-serif',
+              color: glitchActive ? '#ff1493' : '#00d4ff',
+              textShadow: glitchActive
+                ? `4px 4px 0 #000, 0 0 40px #ff1493, 0 0 80px #ff1493`
+                : `4px 4px 0 #000, 0 0 40px #00d4ff, 0 0 80px #00d4ff`,
+              transform: glitchActive ? 'translateX(-2px) skewX(2deg)' : 'none',
+              transition: 'transform 0.05s',
+              letterSpacing: '8px',
+            }}
+          >
+            {'ГАМАЮНЫ'.split('').map((char, i) => (
+              <span
+                key={`gam-${i}`}
+                className="inline-block"
+                style={{
+                  animationDelay: `${(i + 8) * 0.05}s`,
+                  transform: glitchActive && i % 2 === 1
                     ? `translateY(${Math.random() * 4 - 2}px)`
                     : 'none',
                 }}
